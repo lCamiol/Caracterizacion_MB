@@ -35,6 +35,7 @@ public class Lotes : MonoBehaviour
     double conversion = 5.79 * Mathf.Pow(10, -6);
     int numeroBurbuja = 0;
     int contador = 0;
+    int prueba = 1;
     // Use this for initialization
     void Start()
     {
