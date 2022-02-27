@@ -18,6 +18,7 @@ public class Lotes : MonoBehaviour
     public Text tiempo_total;
     public Text tiempo_proceso;
     public Mat circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
+    public Mat diametro = new Mat(100, 400, MatType.CV_8UC1, 1);
     //Video a reproducir
     private VideoPlayer videoPlayer;
     private VideoSource videoSource;
@@ -35,7 +36,6 @@ public class Lotes : MonoBehaviour
     double conversion = 5.79 * Mathf.Pow(10, -6);
     int numeroBurbuja = 0;
     int contador = 0;
-    int prueba = 1;
     // Use this for initialization
     void Start()
     {
@@ -117,9 +117,9 @@ public class Lotes : MonoBehaviour
 
     private void caracterizacion_MB(Mat frame)
     {
-        Cv2.ImShow("Original " + contador, frame);
+        //Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
-        Cv2.ImShow("procesamiento "+ contador, frameProcesado);
+        //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
         MBActual.Clear();
         //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
         DeteccionMB(frameProcesado);
@@ -221,7 +221,7 @@ public class Lotes : MonoBehaviour
                 int[] coordenadasDentro = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
                 Cv2.Circle(burbujas_detetadas, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
                 // mostrar grafico de circulos
-                Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
+                //Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
                 // agregar a la lista de burbuja anterior para validar que lleguen desde abajo
                 MBAnterior.Add(coordenadasDentro);
             }
@@ -290,7 +290,7 @@ public class Lotes : MonoBehaviour
         numeroBurbuja = numeroBurbuja + 1;
         Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
         // mostrar grafico de circulos
-        Cv2.ImShow("circulos " + contador, circulos);
+        //Cv2.ImShow("circulos " + contador, circulos);
         // convertir el Mat circulos a textura
         Texture proceso = OpenCvSharp.Unity.MatToTexture(circulos);
         // subir textura en unity
@@ -349,7 +349,11 @@ public class Lotes : MonoBehaviour
     }
     public void velocidad(List<int[]> Burbujas_Vel_Ord)
     {
+        List<Double> velocidadPromedio = new List<Double>();
+        List<int> diamtreoPromedio = new List<int>();
 
+        double velocidadProm = 0;
+        double diametroProm = 0;
         int posicion = 0; //recorrer de forma parelela los dos arreglos
         double t = 0.0021; //preguntar por wapp
         //lista auxiliar para almacenar distancias
@@ -374,8 +378,6 @@ public class Lotes : MonoBehaviour
             velocidadPromedio.Add(Velocidad);
             diamtreoPromedio.Add(coordenadas_burbuja_anterior[2]*2);
 
-            double velocidadProm = velocidadPromedio.Average();
-            double diametroProm = diamtreoPromedio.Average();
             // Aumentar la posicion
             posicion = +1;
             UnityEngine.Debug.Log("velocidad "  + posicion +" "+ Velocidad);
@@ -383,6 +385,15 @@ public class Lotes : MonoBehaviour
             UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
             UnityEngine.Debug.Log("Tamaño Promedio" + diametroProm);
         }
+        if(diamtreoPromedio.Count > 0)
+        {
+            diametroProm = diamtreoPromedio.Average();
+            Cv2.PutText(diametro, "*", new Point(contador * 10, Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, diametroProm.ToString(), new Point(contador * 10, diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
+
+            Cv2.ImShow("diametros ", diametro);
+        }
+        //velocidadProm = velocidadPromedio.Average();
         
     }
 
