@@ -388,7 +388,7 @@ public class Lotes : MonoBehaviour
         if(diamtreoPromedio.Count > 0)
         {
             diametroProm = diamtreoPromedio.Average();
-            Cv2.PutText(diametro, "*", new Point(contador * 10, Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, "*", new Point(contador * 10, texture.width-Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(diametro, diametroProm.ToString(), new Point(contador * 10, diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             Cv2.ImShow("diametros ", diametro);
