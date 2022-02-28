@@ -18,22 +18,23 @@ public class Lotes : MonoBehaviour
     public Text tiempo_total;
     public Text tiempo_proceso;
     public Mat circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
-    public Mat diametro = new Mat(100, 400, MatType.CV_8UC1, 1);
+    public Mat diametro = new Mat(200, 400, MatType.CV_8UC1, 1);
+    public Mat velocidadGrafico = new Mat(200, 400, MatType.CV_8UC1, 1);
     //Video a reproducir
     private VideoPlayer videoPlayer;
     private VideoSource videoSource;
     private List<int[]> MBActual = new List<int[]>();
     private List<int[]> MBAnterior = new List<int[]>();
     private List<int[]> MBOrdenar = new List<int[]>();
-    private List<Double> velocidadPromedio = new List<Double>();
-    private List<int> diamtreoPromedio = new List<int>();
+    private List<Double> velocidadPromedioLote = new List<Double>();
+    private List<Double> diametroPromedioLote = new List<Double>();
     private CircleSegment[] circles;
     List<Mat> lista_frames = new List<Mat>();
 
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = 5.79 * Mathf.Pow(10, -6);
+    double conversion = 5.79 * Mathf.Pow(10, -6); //preguntar porwapp
     int numeroBurbuja = 0;
     int contador = 0;
     // Use this for initialization
@@ -253,6 +254,13 @@ public class Lotes : MonoBehaviour
             UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
             MBAnterior = new List<int[]>(MBOrdenar); // se colana la informacion de MBOrdenar a Mb anteriorS
             velocidad(MBOrdenar);// limpiar Mb actual para las burbujas del nuevo frame
+            if (velocidadPromedioLote.Count > 0)
+            {
+                double velocidadLotes = velocidadPromedioLote.Average();
+                double diametroLotes = diametroPromedioLote.Average();
+                UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
+                UnityEngine.Debug.LogError("diametro lotes" + diametroLotes);
+            }
             //sw_proceso.Stop(); // Detener la medición.
             //tiempo_proceso.text = "Proceso " + sw_proceso.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
             //sw_proceso.Reset();   // resetear el tiempo 
@@ -350,8 +358,8 @@ public class Lotes : MonoBehaviour
     public void velocidad(List<int[]> Burbujas_Vel_Ord)
     {
         List<Double> velocidadPromedio = new List<Double>();
-        List<int> diamtreoPromedio = new List<int>();
-
+        List<Double> diamtreoPromedio = new List<Double>();
+    
         double velocidadProm = 0;
         double diametroProm = 0;
         int posicion = 0; //recorrer de forma parelela los dos arreglos
@@ -388,13 +396,23 @@ public class Lotes : MonoBehaviour
         if(diamtreoPromedio.Count > 0)
         {
             diametroProm = diamtreoPromedio.Average();
-            Cv2.PutText(diametro, "*", new Point(contador * 10, texture.width-Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
-            Cv2.PutText(diametro, diametroProm.ToString(), new Point(contador * 10, diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
+            diametroPromedioLote.Add(diametroProm);
+            Cv2.PutText(diametro, "*", new Point(contador * 10, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             Cv2.ImShow("diametros ", diametro);
         }
-        //velocidadProm = velocidadPromedio.Average();
-        
+        if (velocidadPromedio.Count > 0)
+        {
+            velocidadProm = velocidadPromedio.Average();
+            velocidadPromedioLote.Add(velocidadProm);
+            Cv2.PutText(velocidadGrafico, "-", new Point(contador * 10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(contador * 10, diametro.Height - velocidadProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
+
+            Cv2.ImShow("velocidad", velocidadGrafico);
+        }
+             
+
     }
 
   
