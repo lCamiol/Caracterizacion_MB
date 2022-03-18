@@ -3,7 +3,11 @@ guid: 09afbb68aa4940b4eb11a6ae7a397872
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - image: {instanceID: 0}
+  - videoToPlay: {fileID: 32900000, guid: c052ede38113578418d66276be0b5d27, type: 3}
+  - tiempo_total: {instanceID: 0}
+  - tiempo_proceso: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

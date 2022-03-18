@@ -28,7 +28,8 @@ public class Lotes : MonoBehaviour
     private List<int> diamtreoPromedio = new List<int>();
     private CircleSegment[] circles;
     List<Mat> lista_frames = new List<Mat>();
-
+    [SerializeField] private GameObject Proces = null;
+    [SerializeField] private GameObject Menu = null;
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
@@ -38,9 +39,9 @@ public class Lotes : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        mosMenu();
         //sw_total.Start();// Iniciar medicion de tiempo Total
-        Application.runInBackground = true;
-        StartCoroutine(playVideo());
+       
 
     }
 
@@ -116,9 +117,9 @@ public class Lotes : MonoBehaviour
 
     private void caracterizacion_MB(Mat frame)
     {
-        Cv2.ImShow("Original " + contador, frame);
+        //Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
-        Cv2.ImShow("procesamiento "+ contador, frameProcesado);
+        //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
         MBActual.Clear();
         //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
         DeteccionMB(frameProcesado);
@@ -220,7 +221,7 @@ public class Lotes : MonoBehaviour
                 int[] coordenadasDentro = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
                 Cv2.Circle(burbujas_detetadas, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
                 // mostrar grafico de circulos
-                Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
+                //Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
                 // agregar a la lista de burbuja anterior para validar que lleguen desde abajo
                 MBAnterior.Add(coordenadasDentro);
             }
@@ -289,7 +290,7 @@ public class Lotes : MonoBehaviour
         numeroBurbuja = numeroBurbuja + 1;
         Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
         // mostrar grafico de circulos
-        Cv2.ImShow("circulos " + contador, circulos);
+        //Cv2.ImShow("circulos " + contador, circulos);
         // convertir el Mat circulos a textura
         Texture proceso = OpenCvSharp.Unity.MatToTexture(circulos);
         // subir textura en unity
@@ -385,5 +386,19 @@ public class Lotes : MonoBehaviour
         
     }
 
-  
+    public void mosProc()
+    {
+
+        Proces.SetActive(true);
+        Menu.SetActive(false);
+        Application.runInBackground = true;
+        StartCoroutine(playVideo());
+    }
+
+    private void mosMenu()
+    {
+
+        Proces.SetActive(false);
+        Menu.SetActive(true);
+    }
 }
