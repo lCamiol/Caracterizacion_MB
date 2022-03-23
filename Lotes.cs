@@ -12,11 +12,16 @@ public class Lotes : MonoBehaviour
 {
     //Raw Image to Show Video Images [Assign from the Editor]
     public RawImage image;
+    public RawImage imageDiametro;
+    public RawImage imageVelocidad;
     //Video To Play [Assign from the Editor]
     public VideoClip videoToPlay;
     //Texto para mostrar tiempo 
-    public Text tiempo_total;
-    public Text tiempo_proceso;
+    public Text status;
+    public Text MBDatos;
+    public Text VelocidadDatos;
+    public Text DiametroDatos;
+    public Button btnHistograma;
     public Mat circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
     public Mat diametro = new Mat(200, 400, MatType.CV_8UC1, 1);
     public Mat velocidadGrafico = new Mat(200, 400, MatType.CV_8UC1, 1);
@@ -32,6 +37,7 @@ public class Lotes : MonoBehaviour
     List<Mat> lista_frames = new List<Mat>();
     [SerializeField] private GameObject Proces = null;
     [SerializeField] private GameObject Menu = null;
+    [SerializeField] private GameObject GamObjHistograma = null;
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
@@ -43,8 +49,6 @@ public class Lotes : MonoBehaviour
     {
         mosMenu();
         //sw_total.Start();// Iniciar medicion de tiempo Total
-       
-
     }
 
     private void Update()
@@ -71,20 +75,20 @@ public class Lotes : MonoBehaviour
         while (!videoPlayer.isPrepared)
         {
             UnityEngine.Debug.Log("Preparing Video");
+            status.text = "Preparing Video";
             yield return null;
         }
         UnityEngine.Debug.Log("Done Preparing Video");
+        status.text = "Done Preparing Video";
 
         //image.texture = videoPlayer.texture;
 
         //Play Video
         videoPlayer.Play();
 
-
-        UnityEngine.Debug.Log("Playing Video");
         while (videoPlayer.isPlaying)
         {
-
+            btnHistograma.interactable = false;
             UnityEngine.Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
             // extraer textura del video
             Texture mainTexture = videoPlayer.texture;
@@ -92,8 +96,10 @@ public class Lotes : MonoBehaviour
             Texture2D texture2D = toTexture2D(mainTexture);
             // convertir la textura a Mat para realizar procesamiento con opencv         
             Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
+            Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+            image.texture = original;
             lista_frames.Add(frame);
-            tiempo_total.text = "Reproduciendo video";
+            status.text = "Reproduciendo video";
             yield return null;
         }
         UnityEngine.Debug.Log("total frames" + lista_frames.Count);
@@ -110,15 +116,16 @@ public class Lotes : MonoBehaviour
             }
         }
         UnityEngine.Debug.Log("numero" + contador);
-        /*sw_total.Stop(); // Detener la medición.
+        /*sw_total.Stop(); // Detener la mediciï¿½n.
         tiempo_total.text = "Total " + sw_total.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
         */
-        
+        btnHistograma.interactable = true;
         UnityEngine.Debug.Log("Done Playing Video");
     }
 
     private void caracterizacion_MB(Mat frame)
     {
+        
         //Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
         //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
@@ -259,15 +266,18 @@ public class Lotes : MonoBehaviour
             {
                 double velocidadLotes = velocidadPromedioLote.Average();
                 double diametroLotes = diametroPromedioLote.Average();
-                UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
-                UnityEngine.Debug.LogError("diametro lotes" + diametroLotes);
+                MBDatos.text= "" + velocidadPromedioLote.Count + "";
+                VelocidadDatos.text = "" + Math.Round(velocidadLotes, 2) + " mm/seg";
+                DiametroDatos.text = "" + Math.Round(diametroLotes, 2)  + " Î¼m";
+                // UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
+                // UnityEngine.Debug.LogError("diametro lotes" + diametroLotes);
             }
-            //sw_proceso.Stop(); // Detener la medición.
+            //sw_proceso.Stop(); // Detener la mediciï¿½n.
             //tiempo_proceso.text = "Proceso " + sw_proceso.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
             //sw_proceso.Reset();   // resetear el tiempo 
         }
         MBActual.Clear(); // limpiar Mb ordenara para las burbujas nuevas
-        MBOrdenar.Clear();// Detener la medición.
+        MBOrdenar.Clear();// Detener la mediciï¿½n.
     }
 
     private void Histograma(Mat frame)
@@ -293,7 +303,7 @@ public class Lotes : MonoBehaviour
 
     private void graficar(int[] burbuja_Actual)
     {
-    //UnityEngine.Debug.Log("coor´"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
+    //UnityEngine.Debug.Log("coorï¿½"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
     // funcion utilizada para grafifcar cirulos, Mat para dibujar, coordenada x, cordenada y, radio, escala
         Cv2.Circle(circulos, (int)burbuja_Actual[0], (int)burbuja_Actual[1], (int)burbuja_Actual[2], new Scalar(255, 255, 255));
         numeroBurbuja = numeroBurbuja + 1;
@@ -303,7 +313,7 @@ public class Lotes : MonoBehaviour
         // convertir el Mat circulos a textura
         Texture proceso = OpenCvSharp.Unity.MatToTexture(circulos);
         // subir textura en unity
-        image.texture = proceso;
+        //image.texture = proceso;
     }
 
     private void seguimiento(List<int[]> MB)
@@ -390,9 +400,9 @@ public class Lotes : MonoBehaviour
             // Aumentar la posicion
             posicion = +1;
             UnityEngine.Debug.Log("velocidad "  + posicion +" "+ Velocidad);
-            UnityEngine.Debug.Log("Tamaño " + posicion + " " + (coordenadas_burbuja_ord[2]*2));
+            UnityEngine.Debug.Log("Tamaï¿½o " + posicion + " " + (coordenadas_burbuja_ord[2]*2));
             UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
-            UnityEngine.Debug.Log("Tamaño Promedio" + diametroProm);
+            UnityEngine.Debug.Log("Tamaï¿½o Promedio" + diametroProm);
         }
         if(diamtreoPromedio.Count > 0)
         {
@@ -401,7 +411,9 @@ public class Lotes : MonoBehaviour
             Cv2.PutText(diametro, "*", new Point(contador * 10, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
-            Cv2.ImShow("diametros ", diametro);
+            // Cv2.ImShow("diametros ", diametro);
+            Texture histoDiametro = OpenCvSharp.Unity.MatToTexture(diametro);
+            imageDiametro.texture = histoDiametro;
         }
         if (velocidadPromedio.Count > 0)
         {
@@ -410,7 +422,9 @@ public class Lotes : MonoBehaviour
             Cv2.PutText(velocidadGrafico, "-", new Point(contador * 10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(contador * 10, diametro.Height - velocidadProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
-            Cv2.ImShow("velocidad", velocidadGrafico);
+            //Cv2.ImShow("velocidad", velocidadGrafico);
+            Texture histoVelocidad = OpenCvSharp.Unity.MatToTexture(velocidadGrafico);
+            imageVelocidad.texture = histoVelocidad;
         }
              
 
@@ -421,6 +435,7 @@ public class Lotes : MonoBehaviour
 
         Proces.SetActive(true);
         Menu.SetActive(false);
+        GamObjHistograma.SetActive(false);
         Application.runInBackground = true;
         StartCoroutine(playVideo());
     }
@@ -430,5 +445,16 @@ public class Lotes : MonoBehaviour
 
         Proces.SetActive(false);
         Menu.SetActive(true);
+        GamObjHistograma.SetActive(false);
+    }
+
+    
+    public void mosHistograma()
+    {
+
+        Proces.SetActive(false);
+        Menu.SetActive(false);
+        GamObjHistograma.SetActive(true);
+        Application.runInBackground = true;
     }
 }
