@@ -38,6 +38,7 @@ public class Lotes : MonoBehaviour
     [SerializeField] private GameObject Proces = null;
     [SerializeField] private GameObject Menu = null;
     [SerializeField] private GameObject GamObjHistograma = null;
+    [SerializeField] private GameObject AcercaDe = null;
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
@@ -436,15 +437,17 @@ public class Lotes : MonoBehaviour
         Proces.SetActive(true);
         Menu.SetActive(false);
         GamObjHistograma.SetActive(false);
+        AcercaDe.SetActive(false);
         Application.runInBackground = true;
         StartCoroutine(playVideo());
     }
 
-    private void mosMenu()
+    public void mosMenu()
     {
 
         Proces.SetActive(false);
         Menu.SetActive(true);
+        AcercaDe.SetActive(false);
         GamObjHistograma.SetActive(false);
     }
 
@@ -455,6 +458,18 @@ public class Lotes : MonoBehaviour
         Proces.SetActive(false);
         Menu.SetActive(false);
         GamObjHistograma.SetActive(true);
+        AcercaDe.SetActive(false);
         Application.runInBackground = true;
     }
+
+    public void mosAcercaDe()
+        {
+
+            Proces.SetActive(false);
+            Menu.SetActive(false);
+            GamObjHistograma.SetActive(false);
+            AcercaDe.SetActive(true);
+            Application.runInBackground = true;
+        }
+
 }
