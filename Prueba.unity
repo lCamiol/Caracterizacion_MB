@@ -503,7 +503,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!114 &268540843
 MonoBehaviour:
@@ -520,7 +520,7 @@ MonoBehaviour:
   image: {fileID: 1203915822}
   imageDiametro: {fileID: 1610453094}
   imageVelocidad: {fileID: 45396506}
-  videoToPlay: {fileID: 32900000, guid: c052ede38113578418d66276be0b5d27, type: 3}
+  videoToPlay: {fileID: 32900000, guid: 933d37bdf9b5ecf45b069c1290eab1f8, type: 3}
   status: {fileID: 1724566760}
   MBDatos: {fileID: 1589853408}
   VelocidadDatos: {fileID: 1126092526}
@@ -1395,7 +1395,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &833855325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2668,7 +2668,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1785263921
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3270,7 +3270,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2026981633
 MonoBehaviour:
   m_ObjectHideFlags: 0
