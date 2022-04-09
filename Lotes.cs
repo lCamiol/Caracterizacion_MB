@@ -75,11 +75,11 @@ public class Lotes : MonoBehaviour
         //Wait until video is prepared
         while (!videoPlayer.isPrepared)
         {
-            UnityEngine.Debug.Log("Preparing Video");
+            //UnityEngine.Debug.Log("Preparing Video");
             status.text = "Preparing Video";
             yield return null;
         }
-        UnityEngine.Debug.Log("Done Preparing Video");
+        //UnityEngine.Debug.Log("Done Preparing Video");
         status.text = "Done Preparing Video";
 
         //image.texture = videoPlayer.texture;
@@ -90,7 +90,7 @@ public class Lotes : MonoBehaviour
         while (videoPlayer.isPlaying)
         {
             btnHistograma.interactable = false;
-            UnityEngine.Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
+            //UnityEngine.Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
             // extraer textura del video
             Texture mainTexture = videoPlayer.texture;
             //convertir de textura a textua2D
@@ -103,7 +103,7 @@ public class Lotes : MonoBehaviour
             status.text = "Reproduciendo video";
             yield return null;
         }
-        UnityEngine.Debug.Log("total frames" + lista_frames.Count);
+        //UnityEngine.Debug.Log("total frames" + lista_frames.Count);
         for (int i =0; i < 1044; i+=12 )
         {
             if (i > lista_frames.Count)
@@ -116,12 +116,12 @@ public class Lotes : MonoBehaviour
                 caracterizacion_MB(frame);
             }
         }
-        UnityEngine.Debug.Log("numero" + contador);
+        //UnityEngine.Debug.Log("numero" + contador);
         /*sw_total.Stop(); // Detener la medici�n.
         tiempo_total.text = "Total " + sw_total.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
         */
         btnHistograma.interactable = true;
-        UnityEngine.Debug.Log("Done Playing Video");
+        //UnityEngine.Debug.Log("Done Playing Video");
     }
 
     private void caracterizacion_MB(Mat frame)
@@ -133,7 +133,7 @@ public class Lotes : MonoBehaviour
         MBActual.Clear();
         //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
         DeteccionMB(frameProcesado);
-        UnityEngine.Debug.Log("circulos vacios " + MBActual.Count);
+        //UnityEngine.Debug.Log("circulos vacios " + MBActual.Count);
         circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
         //MBActual.ForEach(graficar);
         categorizacion();
@@ -251,7 +251,7 @@ public class Lotes : MonoBehaviour
     private void categorizacion()
     {
         //MBOrdenar.Clear(); 
-        UnityEngine.Debug.Log("Cantidad Actual " + MBActual.Count + " Anterior " + MBAnterior.Count);
+        //UnityEngine.Debug.Log("Cantidad Actual " + MBActual.Count + " Anterior " + MBAnterior.Count);
         // verificar que las MB anterior y actual se hayan registrado
         if (MBActual.Count > 0 && MBAnterior.Count > 0)
         {
@@ -260,7 +260,7 @@ public class Lotes : MonoBehaviour
             circulos = new Mat(700, 680, MatType.CV_8UC1, 1);// Mat auxiliar utilizado para graficar
             numeroBurbuja = 0;
             MBOrdenar.ForEach(graficar);// se recore Mb actual y por cada elemento se aplica la funcion grafica
-            UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
+           // UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
             MBAnterior = new List<int[]>(MBOrdenar); // se colana la informacion de MBOrdenar a Mb anteriorS
             velocidad(MBOrdenar);// limpiar Mb actual para las burbujas del nuevo frame
             if (velocidadPromedioLote.Count > 0)
@@ -381,7 +381,7 @@ public class Lotes : MonoBehaviour
         // se recorre la lista y se aplica el metodo calcular_velocidad
         Burbujas_Vel_Ord.ForEach(calcular_velocidad);
         // metodo inicializado localmente recibe el valor de cada elemento de la lista
-        UnityEngine.Debug.Log("Num velocidad " + Burbujas_Vel_Ord.Count);
+        //UnityEngine.Debug.Log("Num velocidad " + Burbujas_Vel_Ord.Count);
         void calcular_velocidad(int[] coordenadas_burbuja_ord)
         {
             int[] coordenadas_burbuja_anterior = MBAnterior[posicion]; // almacenar cordenadas de burbuja anterior para calculo de distancia
@@ -400,10 +400,10 @@ public class Lotes : MonoBehaviour
 
             // Aumentar la posicion
             posicion = +1;
-            UnityEngine.Debug.Log("velocidad "  + posicion +" "+ Velocidad);
-            UnityEngine.Debug.Log("Tama�o " + posicion + " " + (coordenadas_burbuja_ord[2]*2));
-            UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
-            UnityEngine.Debug.Log("Tama�o Promedio" + diametroProm);
+            //UnityEngine.Debug.Log("velocidad "  + posicion +" "+ Velocidad);
+            //UnityEngine.Debug.Log("Tama�o " + posicion + " " + (coordenadas_burbuja_ord[2]*2));
+            //UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
+            //UnityEngine.Debug.Log("Tama�o Promedio" + diametroProm);
         }
         if(diamtreoPromedio.Count > 0)
         {
