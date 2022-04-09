@@ -103,13 +103,8 @@ public class Lotes : MonoBehaviour
             status.text = "Reproduciendo video";
             yield return null;
         }
-<<<<<<< HEAD
         //UnityEngine.Debug.Log("total frames" + lista_frames.Count);
         for (int i =0; i < 1044; i+=12 )
-=======
-        UnityEngine.Debug.Log("total frames" + lista_frames.Count);
-        for (int i =0; i < lista_frames.Count; i+=12 )
->>>>>>> cf4c440be06453314aa0c6756003dfcdb10b6d8b
         {
                 Mat frame = lista_frames[i];
                 //Cv2.ImShow("original" + contador, frame);
