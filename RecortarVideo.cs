@@ -6,38 +6,50 @@ using UnityEngine.Video;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System;
 
 public class RecortarVideo : MonoBehaviour
 {
     //Raw Image to Show Video Images [Assign from the Editor]
     public RawImage image;
+    public RawImage imageDiametro;
+    public RawImage imageVelocidad;
     //Video To Play [Assign from the Editor]
     public VideoClip videoToPlay;
-    public Mat circulos = new Mat(680, 700, MatType.CV_8UC1, 1);
     //Texto para mostrar tiempo 
-    public Text tiempo_total;
-    public Text tiempo_proceso;
-
+    public Text status;
+    public Text MBDatos;
+    public Text VelocidadDatos;
+    public Text DiametroDatos;
+    public Button btnHistograma;
+    public Mat circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
+    public Mat diametro = new Mat(200, 400, MatType.CV_8UC1, 1);
+    public Mat velocidadGrafico = new Mat(200, 400, MatType.CV_8UC1, 1);
     //Video a reproducir
     private VideoPlayer videoPlayer;
     private VideoSource videoSource;
-   
     private List<int[]> MBActual = new List<int[]>();
     private List<int[]> MBAnterior = new List<int[]>();
     private List<int[]> MBOrdenar = new List<int[]>();
-
+    private List<Double> velocidadPromedioLote = new List<Double>();
+    private List<Double> diametroPromedioLote = new List<Double>();
+    private CircleSegment[] circles;
+    List<Mat> lista_frames = new List<Mat>();
+    [SerializeField] private GameObject Proces = null;
+    [SerializeField] private GameObject Menu = null;
+    [SerializeField] private GameObject GamObjHistograma = null;
+    [SerializeField] private GameObject AcercaDe = null;
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = 5.79 * Mathf.Pow(10,-6);
+    double conversion = 5.79 * Mathf.Pow(10, -6); //preguntar porwapp
     int numeroBurbuja = 0;
+    int contador = 0;
     // Use this for initialization
     void Start()
     {
+        mosMenu();
         //sw_total.Start();// Iniciar medicion de tiempo Total
-        Application.runInBackground = true;
-        StartCoroutine(playVideo());
-
     }
 
     private void Update()
@@ -64,44 +76,72 @@ public class RecortarVideo : MonoBehaviour
         while (!videoPlayer.isPrepared)
         {
             UnityEngine.Debug.Log("Preparing Video");
+            status.text = "Preparing Video";
             yield return null;
         }
         UnityEngine.Debug.Log("Done Preparing Video");
+        status.text = "Done Preparing Video";
 
         //image.texture = videoPlayer.texture;
 
         //Play Video
         videoPlayer.Play();
 
-
-        UnityEngine.Debug.Log("Playing Video");
         while (videoPlayer.isPlaying)
         {
-
+            btnHistograma.interactable = false;
             UnityEngine.Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
-            caracterizacion_MB();
+            // extraer textura del video
+            Texture mainTexture = videoPlayer.texture;
+            //convertir de textura a textua2D
+            Texture2D texture2D = toTexture2D(mainTexture);
+            // convertir la textura a Mat para realizar procesamiento con opencv         
+            Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
+            caracterizacion_MB(frame);
+            // Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+            // image.texture = original;
+            // lista_frames.Add(frame);
+            // status.text = "Reproduciendo video";
             yield return null;
         }
-
-        /*sw_total.Stop(); // Detener la medición.
+        // UnityEngine.Debug.Log("total frames" + lista_frames.Count);
+        // for (int i =0; i < 1044; i+=12 )
+        // {
+        //     if (i > lista_frames.Count)
+        //     {
+        //         break;
+        //     }else
+        //     {
+        //         Mat frame = lista_frames[i];
+        //         //Cv2.ImShow("original" + contador, frame);
+                
+        //     }
+        // }
+        UnityEngine.Debug.Log("numero" + contador);
+        /*sw_total.Stop(); // Detener la mediciï¿½n.
         tiempo_total.text = "Total " + sw_total.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
-        UnityEngine.Debug.Log("Done Playing Video");*/
+        */
+        btnHistograma.interactable = true;
+        UnityEngine.Debug.Log("Done Playing Video");
     }
 
-    private void caracterizacion_MB()
+    private void caracterizacion_MB(Mat frame)
     {
-        // extraer textura del video
-        Texture mainTexture = videoPlayer.texture;
-        //convertir de textura a textua2D
-        Texture2D texture2D = toTexture2D(mainTexture);
-        // convertir la textura a Mat para realizar procesamiento con opencv  
-        //Texture2D texture2D = (Texture2D) mainTexture;
-        //Assign the Texture from Video to RawImage to be displayed       
-        Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
+        
+        //Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
+        Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+            image.texture = original;
+        //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
+        MBActual.Clear();
+        //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
         DeteccionMB(frameProcesado);
+        UnityEngine.Debug.Log("circulos vacios " + MBActual.Count);
+        circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
+        //MBActual.ForEach(graficar);
         categorizacion();
-
+      
+        contador += 1;
 
         /*Texture proceso = OpenCvSharp.Unity.MatToTexture(frameProcesado);
         image.texture = proceso;
@@ -126,7 +166,7 @@ public class RecortarVideo : MonoBehaviour
         //se lee los nuevos pixeles con cordenadas de inicio y fin
         //texture2D.ReadPixels(new UnityEngine.Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
         texture2D.ReadPixels(new UnityEngine.Rect(300, 1, 800, 700), 0, 0);
-         
+
         texture2D.Apply();
         //finalmente se remplaza 
         RenderTexture.active = currentRT;
@@ -138,21 +178,22 @@ public class RecortarVideo : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
+        
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
 
         //Cv2.Threshold(frame, frame, 0, 255, ThresholdTypes.Otsu);
-
+        
 
         //Filtro mediana //medfilt2 es propio de matlab
         Cv2.MedianBlur(frame, frame, 13);
         //Size ksize = new Size(7, 7);
-
+        
         //Cv2.FastNlMeansDenoising(frame, frame);
 
         //filtro Gause
-
+        
         Size ksize1 = new Size(3, 3);
         Cv2.GaussianBlur(frame, frame, ksize1, 180);
         //int ddepth = frame.Type().Depth;
@@ -164,12 +205,12 @@ public class RecortarVideo : MonoBehaviour
 
         //Histograma(frame);
 
-        Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(4, 4));
+        Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(8 , 8));
         Mat Kernel2 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(6, 6));
-        Cv2.Dilate(frame, frame, Kernel);
+        Cv2.Dilate(frame, frame, Kernel);  
         Cv2.Erode(frame, frame, Kernel2);
         Cv2.Threshold(frame, frame, 110, 255, ThresholdTypes.Binary);
-
+        
         //filtro de canny
         Cv2.Canny(frame, frame, 0, 255, 5, true);
         return frame;
@@ -178,28 +219,35 @@ public class RecortarVideo : MonoBehaviour
     private void DeteccionMB(Mat frame)
     {
         // implementacion Hough circles
-        CircleSegment[] circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 0.5, 5, 11, 14, 5, 20);
+        circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 0.5, 5, 12, 14, 5, 30);
+        Mat burbujas_detetadas = new Mat(700, 680, MatType.CV_8UC1, 1);
+        Mat burubja = new Mat(700, 680, MatType.CV_8UC1, 1);
         // UnityEngine.Debug.LogError(frame.Height);
         // recorrer cada circulo encontrado
         foreach (CircleSegment circle in circles)
         {
-            // UnityEngine.Debug.LogError((int)circle.Center.Y);
+            //UnityEngine.Debug.LogError("cordenadas "+ (int)circle.Center.X+ " " +(int)circle.Center.Y);
             // validar si la burbuja llega desde abajo
-            if ((int)circle.Center.Y >= 680)
+            if ((int)circle.Center.Y >= 690)
             {
-                UnityEngine.Debug.Log("Burbuja");
                 // crear arrelo con cordenadas de la burbuja
                 int[] coordenadasDentro = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
+                Cv2.Circle(burbujas_detetadas, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
+                // mostrar grafico de circulos
+                //Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
                 // agregar a la lista de burbuja anterior para validar que lleguen desde abajo
                 MBAnterior.Add(coordenadasDentro);
-                UnityEngine.Debug.Log("total" + MBActual.Count);
             }
+            
+            //Cv2.Circle(burubja, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
+            //Cv2.ImShow("circulos detectados " + contador, burubja);
             // crear arrelo con cordenadas de la burbuja
             int[] coordenadas = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
-            // agregar a lista actual para validar el dezplazamiento pro frame
+            // agregar a lista actual para validar el dezplazamiento por frame
             MBActual.Add(coordenadas);
             //Cv2.Circle(circulos, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
         }
+        
 
     }
 
@@ -213,20 +261,31 @@ public class RecortarVideo : MonoBehaviour
             //sw_proceso.Start();// iniciar medicion de tiempo
             seguimiento(MBAnterior); // metodo utilizado para realizar el seguimiento de las MB enviando como parametro Mb anterior
             circulos = new Mat(700, 680, MatType.CV_8UC1, 1);// Mat auxiliar utilizado para graficar
+            numeroBurbuja = 0;
             MBOrdenar.ForEach(graficar);// se recore Mb actual y por cada elemento se aplica la funcion grafica
-            UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count);
+            UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
             MBAnterior = new List<int[]>(MBOrdenar); // se colana la informacion de MBOrdenar a Mb anteriorS
             velocidad(MBOrdenar);// limpiar Mb actual para las burbujas del nuevo frame
-            //sw_proceso.Stop(); // Detener la medición.
+            if (velocidadPromedioLote.Count > 0)
+            {
+                double velocidadLotes = velocidadPromedioLote.Average();
+                double diametroLotes = diametroPromedioLote.Average();
+                MBDatos.text= "" + velocidadPromedioLote.Count + "";
+                VelocidadDatos.text = "" + Math.Round(velocidadLotes, 2) + " mm/seg";
+                DiametroDatos.text = "" + Math.Round(diametroLotes, 2)  + " Î¼m";
+                // UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
+                // UnityEngine.Debug.LogError("diametro lotes" + diametroLotes);
+            }
+            //sw_proceso.Stop(); // Detener la mediciï¿½n.
             //tiempo_proceso.text = "Proceso " + sw_proceso.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
             //sw_proceso.Reset();   // resetear el tiempo 
         }
         MBActual.Clear(); // limpiar Mb ordenara para las burbujas nuevas
-        MBOrdenar.Clear();// Detener la medición
-
+        MBOrdenar.Clear();// Detener la mediciï¿½n.
     }
 
-    private void Histograma(Mat frame) {
+    private void Histograma(Mat frame)
+    {
         // vaiable auxliar para generar el histograma
         Mat hist = new Mat();
         // Mat para guardar resltado final en forma grafica
@@ -243,27 +302,27 @@ public class RecortarVideo : MonoBehaviour
             Cv2.Line(result, new Point(i, 500), new Point(i, 500 - hist.Get<float>(i)), Scalar.White);
         }
         // mostrar histograma
-        Cv2.ImShow("histogram", result);
+        //Cv2.ImShow("histogram", result);
     }
 
     private void graficar(int[] burbuja_Actual)
     {
-        //UnityEngine.Debug.Log("coor´"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
-        // funcion utilizada para grafifcar cirulos, Mat para dibujar, coordenada x, cordenada y, radio, escala
+    //UnityEngine.Debug.Log("coorï¿½"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
+    // funcion utilizada para grafifcar cirulos, Mat para dibujar, coordenada x, cordenada y, radio, escala
         Cv2.Circle(circulos, (int)burbuja_Actual[0], (int)burbuja_Actual[1], (int)burbuja_Actual[2], new Scalar(255, 255, 255));
         numeroBurbuja = numeroBurbuja + 1;
-        Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 0.5, 255);
+        Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
         // mostrar grafico de circulos
-        Cv2.ImShow("circulos", circulos);
+        //Cv2.ImShow("circulos " + contador, circulos);
         // convertir el Mat circulos a textura
         Texture proceso = OpenCvSharp.Unity.MatToTexture(circulos);
         // subir textura en unity
-        image.texture = proceso;
+        //image.texture = proceso;
     }
 
     private void seguimiento(List<int[]> MB)
     {
-        tiempo_total.text = "" + MB.Count();
+        //tiempo_total.text = "" + MB.Count();
         // REcorrer lista y por cada elemento aplicar distancia minima
         MB.ForEach(distanciaMinima);
     }
@@ -284,6 +343,7 @@ public class RecortarVideo : MonoBehaviour
             int dY = Mathf.Abs(coordenadas_burbuja_actual[1] - coordenadas_burbuja_anterior[1]);
             // implementar formula de distancia euclidiana
             float calculo_distancia = Mathf.Sqrt((dX ^ 2) + (dY ^ 2));
+            // UnityEngine.Debug.Log("distancia "+ calculo_distancia + " X " +  dX + " Y "+ dY );
             // agregar la distancia a la lista
             distancias.Add(calculo_distancia);
         }
@@ -293,25 +353,38 @@ public class RecortarVideo : MonoBehaviour
         copia_distancias.Sort();
         // almacenar y obtener el valor minimo
         float distancia_minima = copia_distancias[0];
-        // obtener ubicacion orginal de la lista original de distancias
-        var ubucacion_burbuja = distancias.IndexOf(distancia_minima);
-        //distancias.Clear();
-        // obtenr ubicacion de las cordenadas en Mb acutal
-        int[] burbuja = MBActual[ubucacion_burbuja];
-        // almacenar las cordenadas de la burbuja
-        int[] coordenadas_burbuja_actual_ordenada = { burbuja[0], burbuja[1], burbuja[2] };
-        // guardar la informacion en MbOrdenar
-        MBOrdenar.Add(coordenadas_burbuja_actual_ordenada);
+        // UnityEngine.Debug.LogError("distancia minima " + distancia_minima);
+        if (distancia_minima > 7) { return; }
+        else
+        {
+            // obtener ubicacion orginal de la lista original de distancias
+            var ubucacion_burbuja = distancias.IndexOf(distancia_minima);
+            //distancias.Clear();
+            //UnityEngine.Debug.Log("ubicacion distancia minima" + ubucacion_burbuja);
+            // obtener ubicacion de las cordenadas en Mb actual
+            int[] burbuja = MBActual[ubucacion_burbuja];
+            // almacenar las cordenadas de la burbuja
+            int[] coordenadas_burbuja_actual_ordenada = { burbuja[0], burbuja[1], burbuja[2] };
+            //UnityEngine.Debug.Log("coordenadas" + burbuja[0] + " "+  burbuja[1]+ " " +burbuja[2]);
+            // guardar la informacion en MbOrdenar
+            MBOrdenar.Add(coordenadas_burbuja_actual_ordenada);
+        }
     }
-    public void velocidad(List<int[]> Burbujas_Vel)
+    public void velocidad(List<int[]> Burbujas_Vel_Ord)
     {
+        List<Double> velocidadPromedio = new List<Double>();
+        List<Double> diamtreoPromedio = new List<Double>();
+    
+        double velocidadProm = 0;
+        double diametroProm = 0;
         int posicion = 0; //recorrer de forma parelela los dos arreglos
         double t = 0.0021; //preguntar por wapp
         //lista auxiliar para almacenar distancias
         List<float> Listdistancia = new List<float>();
         // se recorre la lista y se aplica el metodo calcular_velocidad
-        Burbujas_Vel.ForEach(calcular_velocidad);
+        Burbujas_Vel_Ord.ForEach(calcular_velocidad);
         // metodo inicializado localmente recibe el valor de cada elemento de la lista
+        UnityEngine.Debug.Log("Num velocidad " + Burbujas_Vel_Ord.Count);
         void calcular_velocidad(int[] coordenadas_burbuja_ord)
         {
             int[] coordenadas_burbuja_anterior = MBAnterior[posicion]; // almacenar cordenadas de burbuja anterior para calculo de distancia
@@ -323,12 +396,83 @@ public class RecortarVideo : MonoBehaviour
             // implementar formula de distancia euclidiana
             float calculo_distancia = Mathf.Sqrt((dX ^ 2) + (dY ^ 2));
             // Calculo de la velocidad
+            //UnityEngine.Debug.Log("velocidad " + contador +" " + calculo_distancia);
             double Velocidad = (conversion * calculo_distancia) / t;
-            UnityEngine.Debug.Log("velocidad "+ Velocidad);
+            velocidadPromedio.Add(Velocidad);
+            diamtreoPromedio.Add(coordenadas_burbuja_anterior[2]*2);
+
             // Aumentar la posicion
             posicion = +1;
+            UnityEngine.Debug.Log("velocidad "  + posicion +" "+ Velocidad);
+            UnityEngine.Debug.Log("Tamaï¿½o " + posicion + " " + (coordenadas_burbuja_ord[2]*2));
+            UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
+            UnityEngine.Debug.Log("Tamaï¿½o Promedio" + diametroProm);
         }
+        if(diamtreoPromedio.Count > 0)
+        {
+            diametroProm = diamtreoPromedio.Average();
+            diametroPromedioLote.Add(diametroProm);
+            Cv2.PutText(diametro, "*", new Point(contador * 10, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
+            // Cv2.ImShow("diametros ", diametro);
+            Texture histoDiametro = OpenCvSharp.Unity.MatToTexture(diametro);
+            imageDiametro.texture = histoDiametro;
+        }
+        if (velocidadPromedio.Count > 0)
+        {
+            velocidadProm = velocidadPromedio.Average();
+            velocidadPromedioLote.Add(velocidadProm);
+            Cv2.PutText(velocidadGrafico, "-", new Point(contador * 10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(contador * 10, diametro.Height - velocidadProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
+
+            //Cv2.ImShow("velocidad", velocidadGrafico);
+            Texture histoVelocidad = OpenCvSharp.Unity.MatToTexture(velocidadGrafico);
+            imageVelocidad.texture = histoVelocidad;
+        }
+             
 
     }
+
+    public void mosProc()
+    {
+
+        Proces.SetActive(true);
+        Menu.SetActive(false);
+        GamObjHistograma.SetActive(false);
+        AcercaDe.SetActive(false);
+        Application.runInBackground = true;
+        StartCoroutine(playVideo());
+    }
+
+    public void mosMenu()
+    {
+
+        Proces.SetActive(false);
+        Menu.SetActive(true);
+        AcercaDe.SetActive(false);
+        GamObjHistograma.SetActive(false);
+    }
+
+    
+    public void mosHistograma()
+    {
+
+        Proces.SetActive(false);
+        Menu.SetActive(false);
+        GamObjHistograma.SetActive(true);
+        AcercaDe.SetActive(false);
+        Application.runInBackground = true;
+    }
+
+    public void mosAcercaDe()
+        {
+
+            Proces.SetActive(false);
+            Menu.SetActive(false);
+            GamObjHistograma.SetActive(false);
+            AcercaDe.SetActive(true);
+            Application.runInBackground = true;
+        }
+
 }

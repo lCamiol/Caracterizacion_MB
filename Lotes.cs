@@ -97,24 +97,23 @@ public class Lotes : MonoBehaviour
             Texture2D texture2D = toTexture2D(mainTexture);
             // convertir la textura a Mat para realizar procesamiento con opencv         
             Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
-            Texture original = OpenCvSharp.Unity.MatToTexture(frame);
-            image.texture = original;
+            // Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+            // image.texture = original;
             lista_frames.Add(frame);
             status.text = "Reproduciendo video";
             yield return null;
         }
+<<<<<<< HEAD
         //UnityEngine.Debug.Log("total frames" + lista_frames.Count);
         for (int i =0; i < 1044; i+=12 )
+=======
+        UnityEngine.Debug.Log("total frames" + lista_frames.Count);
+        for (int i =0; i < lista_frames.Count; i+=12 )
+>>>>>>> cf4c440be06453314aa0c6756003dfcdb10b6d8b
         {
-            if (i > lista_frames.Count)
-            {
-                break;
-            }else
-            {
                 Mat frame = lista_frames[i];
                 //Cv2.ImShow("original" + contador, frame);
                 caracterizacion_MB(frame);
-            }
         }
         //UnityEngine.Debug.Log("numero" + contador);
         /*sw_total.Stop(); // Detener la medici�n.
@@ -129,6 +128,8 @@ public class Lotes : MonoBehaviour
         
         //Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
+        Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+            image.texture = original;
         //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
         MBActual.Clear();
         //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
