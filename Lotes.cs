@@ -82,7 +82,7 @@ public class Lotes : MonoBehaviour
         //UnityEngine.Debug.Log("Done Preparing Video");
         status.text = "Done Preparing Video";
 
-        //image.texture = videoPlayer.texture;
+        image.texture = videoPlayer.texture;
 
         //Play Video
         videoPlayer.Play();
@@ -104,7 +104,7 @@ public class Lotes : MonoBehaviour
             yield return null;
         }
         //UnityEngine.Debug.Log("total frames" + lista_frames.Count);
-        for (int i =0; i < 1044; i+=12 )
+        for (int i =0; i < lista_frames.Count(); i+=12 )
         {
                 Mat frame = lista_frames[i];
                 //Cv2.ImShow("original" + contador, frame);
