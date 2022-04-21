@@ -42,7 +42,7 @@ public class Lotes : MonoBehaviour
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = 5.79 * Mathf.Pow(10, -6); //preguntar porwapp
+    double conversion = ((0.6*1000)/12.5734); 
     int numeroBurbuja = 0;
     int contador = 0;
     // Use this for initialization
