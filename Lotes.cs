@@ -42,7 +42,7 @@ public class Lotes : MonoBehaviour
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = ((0.6*1000)/12.5734); 
+    double conversion = 0.6/(18.5734*2); 
     int numeroBurbuja = 0;
     int contador = 0;
     // Use this for initialization
@@ -392,7 +392,7 @@ public class Lotes : MonoBehaviour
             //UnityEngine.Debug.Log("velocidad " + contador +" " + calculo_distancia);
             double Velocidad = (conversion * calculo_distancia) / t;
             velocidadPromedio.Add(Velocidad);
-            diamtreoPromedio.Add(coordenadas_burbuja_anterior[2]*2);
+            diamtreoPromedio.Add(coordenadas_burbuja_anterior[2]*2*conversion*1000);
 
             // Aumentar la posicion
             posicion = +1;
