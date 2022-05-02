@@ -263,7 +263,7 @@ public class Lotes : MonoBehaviour
             {
                 double velocidadLotes = velocidadPromedioLote.Average();
                 double diametroLotes = diametroPromedioLote.Average();
-                MBDatos.text= "" + velocidadPromedioLote.Count + "";
+                MBDatos.text= "" + velocidadPromedioLote.Count() + "";
                 VelocidadDatos.text = "" + Math.Round(velocidadLotes, 2) + " mm/seg";
                 DiametroDatos.text = "" + Math.Round(diametroLotes, 2)  + " μm";
                 // UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
