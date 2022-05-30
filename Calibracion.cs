@@ -8,6 +8,7 @@ using System.Linq;
 using System;
 using System.IO;
 using System.Globalization;
+using System.Threading.Tasks;
 
 public class Calibracion : MonoBehaviour
  
@@ -25,7 +26,7 @@ public class Calibracion : MonoBehaviour
         Mat map1 = OpenCvSharp.Unity.TextureToMat(tex);
         Cv2.Resize(map1, map1, new Size(1920, 1080));
 
-        string path = "Assets/Caracterizacion_MB/Params.txt"; 
+        string path = "Assets/Caracterizacion_MB/Params.txt";
         //Read the text from directly from the test.txt file
         StreamReader reader = new StreamReader(path);
         //Debug.Log(path);
@@ -38,16 +39,18 @@ public class Calibracion : MonoBehaviour
             string fila = reader.ReadLine();
             string[] arreglo = fila.Split(' ');
             for (int i = 0; i < arreglo.Length; i++)
+            {
+                try
                 {
-                    try{
-                        decimal param= Convert.ToDecimal(arreglo[i], cultures);
-                        DatosCamara.Add(param);
+                    decimal param = Convert.ToDecimal(arreglo[i], cultures);
+                    DatosCamara.Add(param);
                     Debug.Log(param);
-                    }
-                catch{
-                        break;
-                    }
-                }        
+                }
+                catch
+                {
+                    break;
+                }
+            }
         }
 
 
@@ -109,14 +112,16 @@ public class Calibracion : MonoBehaviour
         rms = Cv2.CalibrateCamera(objPoints, imgPoints, map1.Size(), camera, distortion, out var rvectors, out var tvectors, CalibrationFlags.UseIntrinsicGuess | CalibrationFlags.FixK5);
         newcam1 = Cv2.GetOptimalNewCameraMatrix(camera, distortion, map1.Size(),1, map1.Size(),out var roi);*/
         //Cv2.InitUndistortRectifyMap(cameraMatrix, distCoeffs, new Mat(), newcam1, Size(700, 680), map1, map2);
-        Mat map2 = map1.Clone();
+        /*Mat map2 = map1.Clone();
         UnityEngine.Debug.Log("Tipo" + map2);
         Cv2.Undistort(map1,map2, cameraMatrix, distCoeffs);
         UnityEngine.Debug.Log("Tipo" + map2);
         Cv2.ImShow("Imagen normal", map1);
         Cv2.ImShow("imagen calibrada", map2);
         //UnityEngine.Debug.Log("Matriz de distorsion" + cameraMatrix.ToString());
-        //UnityEngine.Debug.Log("coeficiente de dst");
+        //UnityEngine.Debug.Log("coeficiente de dst");*/
+
+
     }
     // Update is called once per frame
     void Update()
