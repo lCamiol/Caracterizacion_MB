@@ -44,27 +44,23 @@ public class CalibracionChina : MonoBehaviour
 
         for (int i = 0; i < imagesList.Count; i++)
         {
-            Debug.Log(imagesList)
             byte[] fileData =
                 File.ReadAllBytes(imagesList[i]);
             var tex = new Texture2D(2, 2);
             tex.LoadImage (fileData);
             Mat view = OpenCvSharp.Unity.TextureToMat(tex);
-            Cv2.ImShow("Image View", view);
-            // if (!view.Empty())
-            // {
-            //     imageSize = view.Size();
-            //     Point2f[] pointBuf;
-
-            //     Cv2.ImShow("Image View", view);
-            //     found =
-            //         Cv2
-            //             .FindChessboardCorners(view,
-            //             BoardSize,
-            //             out pointBuf,
-            //             ChessboardFlags.AdaptiveThresh |
-            //             ChessboardFlags.NormalizeImage);
-            //     Debug.Log("Prueba " + pointBuf.Length);
+            if (!view.Empty())
+            {
+                imageSize = view.Size();
+                Point2f[] pointBuf;
+                found =
+                    Cv2
+                        .FindChessboardCorners(view,
+                        BoardSize,
+                        out pointBuf,
+                        ChessboardFlags.AdaptiveThresh |
+                        ChessboardFlags.NormalizeImage);
+                Debug.Log("Prueba " + found);
             //     if (found == true)
             //     {
             //         var criteria =
@@ -96,7 +92,7 @@ public class CalibracionChina : MonoBehaviour
             //         Cv2.ImShow("Image View", view);
             //         Cv2.WaitKey(500);
             //     }
-            // }
+            }
         }
         Mat[] rvecs = new Mat[0];
         Mat[] tvecs = new Mat[0];
