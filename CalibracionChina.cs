@@ -27,40 +27,38 @@ public class CalibracionChina : MonoBehaviour
         List<string> imagesList =
             new List<string>()
             {
-                "Assets/Caracterizacion_MB/2/IMG_20220311_170745.jpg",
-                "Assets/Caracterizacion_MB/2/IMG_20220311_170747.jpg",
-                "Assets/Caracterizacion_MB/2/IMG_20220311_170802.jpg",
-                "Assets/Caracterizacion_MB/2/IMG_20220311_170806.jpg",
-                "Assets/Caracterizacion_MB/2/IMG_20220311_170810.jpg"
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171340.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171338.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171336.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171007.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_170810.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171348.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171435.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171435_1.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171436.jpg",
+                "Assets/Caracterizacion_MB/2/IMG_20220311_171437.jpg"
             };
-        List<Point2f[]> imagesPoints = new List<Point2f[]>();
-        Mat
-            cameraMatrix = new Mat(),
-            distCoeffs = new Mat();
-        Size imageSize = new Size();
-        bool found = false;
-
-        Mat[] imagesPointsM = new Mat[imagesList.Count];
-
-        for (int i = 0; i < imagesList.Count; i++)
-        {
-            byte[] fileData =
-                File.ReadAllBytes(imagesList[i]);
-            var tex = new Texture2D(2, 2);
-            tex.LoadImage (fileData);
-            Mat view = OpenCvSharp.Unity.TextureToMat(tex);
-            if (!view.Empty())
-            {
-                imageSize = view.Size();
-                Point2f[] pointBuf;
-                found =
-                    Cv2
-                        .FindChessboardCorners(view,
-                        BoardSize,
-                        out pointBuf,
-                        ChessboardFlags.AdaptiveThresh |
-                        ChessboardFlags.NormalizeImage);
-                Debug.Log("Prueba " + found);
+        
+            for (int i = 0; i < imagesList.Count; i++)
+            // {
+            //     byte[] fileData =
+            //         File.ReadAllBytes(imagesList[i]);
+            //     var tex = new Texture2D(2, 2);
+            //     tex.LoadImage (fileData);
+            //     Mat view = OpenCvSharp.Unity.TextureToMat(tex);
+            //     if (!view.Empty())
+            //     {
+            //         imageSize = view.Size();
+            //         Point2f[] pointBuf;
+            //         found =
+            //             Cv2
+            //                 .FindChessboardCorners(view,
+            //                 BoardSize,
+            //                 out pointBuf,
+            //                 ChessboardFlags.AdaptiveThresh |
+            //                 ChessboardFlags.NormalizeImage);
+            //         Cv2.ImShow("Image View", view);
+            //         Debug.Log("Prueba " + found);
             //     if (found == true)
             //     {
             //         var criteria =
