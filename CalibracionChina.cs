@@ -18,9 +18,17 @@ public class CalibracionChina : MonoBehaviour
 
     static Size BoardSize = new Size(BoardSize_Width, BoardSize_Height);
 
-    static int SquareSize = 5;
-
     static int winSize = 11;
+
+    bool found = false;
+
+    Size imageSize = new Size();
+
+    List<Point2f[]> imagesPoints = new List<Point2f[]>();
+
+    Mat cameraMatrix = new Mat();
+
+    Mat distCoeffs = new Mat();
 
     void Start()
     {
@@ -38,58 +46,56 @@ public class CalibracionChina : MonoBehaviour
                 "Assets/Caracterizacion_MB/2/IMG_20220311_171436.jpg",
                 "Assets/Caracterizacion_MB/2/IMG_20220311_171437.jpg"
             };
-        
-            for (int i = 0; i < imagesList.Count; i++)
-            // {
-            //     byte[] fileData =
-            //         File.ReadAllBytes(imagesList[i]);
-            //     var tex = new Texture2D(2, 2);
-            //     tex.LoadImage (fileData);
-            //     Mat view = OpenCvSharp.Unity.TextureToMat(tex);
-            //     if (!view.Empty())
-            //     {
-            //         imageSize = view.Size();
-            //         Point2f[] pointBuf;
-            //         found =
-            //             Cv2
-            //                 .FindChessboardCorners(view,
-            //                 BoardSize,
-            //                 out pointBuf,
-            //                 ChessboardFlags.AdaptiveThresh |
-            //                 ChessboardFlags.NormalizeImage);
-            //         Cv2.ImShow("Image View", view);
-            //         Debug.Log("Prueba " + found);
-            //     if (found == true)
-            //     {
-            //         var criteria =
-            //             new TermCriteria(CriteriaType.Eps |
-            //                 CriteriaType.MaxIter,
-            //                 30,
-            //                 0.001);
-            //         Mat viewGray = new Mat();
-            //         Cv2.CvtColor(view, viewGray, ColorConversionCodes.BGR2GRAY);
-            //         Cv2
-            //             .CornerSubPix(viewGray,
-            //             pointBuf,
-            //             new Size(winSize, winSize),
-            //             new Size(-1, -1),
-            //             criteria);
-            //         imagesPoints.Add (pointBuf);
-            //         Debug.Log("Intento" + pointBuf);
-            //         Mat p =
-            //             new Mat(BoardSize.Width, 1, MatType.CV_64F, pointBuf);
-            //         imagesPointsM[i] = p;
 
-            //         Cv2.DrawChessboardCorners (
-            //             view,
-            //             BoardSize,
-            //             pointBuf,
-            //             found
-            //         );
-            //         Mat temp = view.Clone();
-            //         Cv2.ImShow("Image View", view);
-            //         Cv2.WaitKey(500);
-            //     }
+        for (int i = 0; i < imagesList.Count; i++)
+        {
+            Mat[] imagesPointsM = new Mat[imagesList.Count];
+
+            byte[] fileData = File.ReadAllBytes(imagesList[i]);
+            var tex = new Texture2D(2, 2);
+            tex.LoadImage (fileData);
+            Mat view = OpenCvSharp.Unity.TextureToMat(tex);
+            if (!view.Empty())
+            {
+                imageSize = view.Size();
+                Point2f[] pointBuf;
+                found =
+                    Cv2
+                        .FindChessboardCorners(view,
+                        BoardSize,
+                        out pointBuf,
+                        ChessboardFlags.AdaptiveThresh |
+                        ChessboardFlags.NormalizeImage);
+                if (found == true)
+                {
+                    var criteria =
+                        new TermCriteria(CriteriaType.Eps |
+                            CriteriaType.MaxIter,
+                            30,
+                            0.001);
+                    Mat viewGray = new Mat();
+                    Cv2.CvtColor(view, viewGray, ColorConversionCodes.BGR2GRAY);
+                    Cv2
+                        .CornerSubPix(viewGray,
+                        pointBuf,
+                        new Size(winSize, winSize),
+                        new Size(-1, -1),
+                        criteria);
+                    imagesPoints.Add (pointBuf);
+                    Debug.Log("Intento" + pointBuf);
+                    Mat p =
+                        new Mat(BoardSize.Width, 1, MatType.CV_64F, pointBuf);
+                    imagesPointsM[i] = p;
+
+                    Cv2.DrawChessboardCorners (
+                        view,
+                        BoardSize,
+                        pointBuf,
+                        found
+                    );
+                    Mat temp = view.Clone();
+                    Cv2.WaitKey(500);
+                }
             }
         }
         Mat[] rvecs = new Mat[0];

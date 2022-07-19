@@ -171,7 +171,8 @@ public class Lotes : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
-        
+        frame = calibracionCamara(frame);
+        // Cv2.ImShow("Imagen normal", frame);
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
@@ -467,5 +468,26 @@ public class Lotes : MonoBehaviour
             AcercaDe.SetActive(true);
             Application.runInBackground = true;
         }
+    private Mat calibracionCamara (Mat frame) {
+        double[,] cameraMatrix =
+        {
+            { 3062.7055460605, 0, 1786.52621963178 },
+            { 0, 3078.00290144012, 1311.79605688144 },
+            { 0, 0, 1 }
+        };
+
+        double[] distCoeffs =
+        { 0.0626007343290323, -0.166909764928163, 0, 0, 0 };
+
+        Mat map2 = new Mat();
+        Cv2
+            .Undistort(frame,
+            map2,
+            InputArray.Create(cameraMatrix),
+            InputArray.Create(distCoeffs));
+
+        return map2;
+    }
+
 
 }
