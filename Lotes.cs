@@ -42,7 +42,8 @@ public class Lotes : MonoBehaviour
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = 0.6/(18.5734*2); 
+    double conversion = 0.6/(117.48); 
+    double t = 0.00104; //preguntar por wapp
     int numeroBurbuja = 0;
     int contador = 0;
     // Use this for initialization
@@ -94,6 +95,7 @@ public class Lotes : MonoBehaviour
             // extraer textura del video
             Texture mainTexture = videoPlayer.texture;
             //convertir de textura a textua2D
+            
             Texture2D texture2D = toTexture2D(mainTexture);
             // convertir la textura a Mat para realizar procesamiento con opencv         
             Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
@@ -146,6 +148,7 @@ public class Lotes : MonoBehaviour
         //se crea una textura con las dimeciones de preferencia para guardar la conversion
         //Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
         //Recorte de la imagen en 680*700
+        // UnityEngine.Debug.Log(texture);
         Texture2D texture2D = new Texture2D(680, 700, TextureFormat.RGBA32, false);
         //se utiliza para empezar el metodo de renderizacion
         RenderTexture currentRT = RenderTexture.active;
@@ -171,8 +174,11 @@ public class Lotes : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
+         Cv2.ImShow("original", frame);
         frame = calibracionCamara(frame);
-        // Cv2.ImShow("Imagen normal", frame);
+        OpenCvSharp.Rect rectCrop = new OpenCvSharp.Rect(0, 0, 650, 680);
+        // frame = new Mat(frame, rectCrop);
+        Cv2.ImShow("Imagen calibration", frame);
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
@@ -372,7 +378,6 @@ public class Lotes : MonoBehaviour
         double velocidadProm = 0;
         double diametroProm = 0;
         int posicion = 0; //recorrer de forma parelela los dos arreglos
-        double t = 0.0021; //preguntar por wapp
         //lista auxiliar para almacenar distancias
         List<float> Listdistancia = new List<float>();
         // se recorre la lista y se aplica el metodo calcular_velocidad
@@ -406,7 +411,7 @@ public class Lotes : MonoBehaviour
         {
             diametroProm = diamtreoPromedio.Average();
             diametroPromedioLote.Add(diametroProm);
-            Cv2.PutText(diametro, "*", new Point(contador * 10, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, "*", new Point(contador *10 , diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             // Cv2.ImShow("diametros ", diametro);
@@ -417,7 +422,7 @@ public class Lotes : MonoBehaviour
         {
             velocidadProm = velocidadPromedio.Average();
             velocidadPromedioLote.Add(velocidadProm);
-            Cv2.PutText(velocidadGrafico, "-", new Point(contador * 10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(velocidadGrafico, "-", new Point(contador *10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(contador * 10, diametro.Height - velocidadProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             //Cv2.ImShow("velocidad", velocidadGrafico);
@@ -468,16 +473,17 @@ public class Lotes : MonoBehaviour
             AcercaDe.SetActive(true);
             Application.runInBackground = true;
         }
+        
     private Mat calibracionCamara (Mat frame) {
         double[,] cameraMatrix =
         {
-            { 3062.7055460605, 0, 1786.52621963178 },
-            { 0, 3078.00290144012, 1311.79605688144 },
+            {2.83943297e+03, 0, 1.90306605e+03 },
+            { 0, 2.83339169e+03, 8.95584317e+02 },
             { 0, 0, 1 }
         };
 
         double[] distCoeffs =
-        { 0.0626007343290323, -0.166909764928163, 0, 0, 0 };
+        { -0.01311819, 0.37176549, 0.01207837,0.00885673, -0.688254 };
 
         Mat map2 = new Mat();
         Cv2
