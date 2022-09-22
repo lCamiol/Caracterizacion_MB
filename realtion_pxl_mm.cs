@@ -17,8 +17,7 @@ public class realtion_pxl_mm : MonoBehaviour
 
     void Start()
     {
-        Mat inteto10 =
-            matImageFile("Assets/Caracterizacion_MB/PruebaNylon_025.jpg");
+        Mat inteto10 = matImageFile("Assets/Caracterizacion_MB/PruebaNylon_025.jpg");
         Debug.Log (inteto10);
         Cv2.ImShow("procesada", inteto10);
         Deteccion (inteto10);
@@ -46,7 +45,9 @@ public class realtion_pxl_mm : MonoBehaviour
             //     matResult,
             //     new Size((int)(tex.width / 10), (int)(tex.height / 10)));
             Cv2.CvtColor(matResult, matResult, ColorConversionCodes.BGR2GRAY);
-            // Cv2.MedianBlur(matResult, matResult, 1);
+            // Cv2.MedianBlur(matResult, matResult, 11);
+            Size ksize1 = new Size(1, 1);
+            Cv2.GaussianBlur(matResult, matResult, ksize1, 255);
             // Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(2, 1.5));
             // Cv2.Dilate(matResult, matResult, Kernel);
             // Mat Kernel2 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(1.5, 2));
@@ -62,7 +63,7 @@ public class realtion_pxl_mm : MonoBehaviour
                 .HoughCircles(frame,
                 HoughMethods.Gradient,
                 1,
-                50,
+                150,
                 12,
                 14,
                 50,
@@ -78,7 +79,7 @@ public class realtion_pxl_mm : MonoBehaviour
                 new Scalar(255, 255, 255));
             Cv2
                 .PutText(burbujas_detetadas,
-                (circle.Radius*2).ToString(),
+                (circle.Radius * 2).ToString(),
                 new Point((int) circle.Center.X, (int) circle.Center.Y + 30),
                 HersheyFonts.HersheySimplex,
                 0.5,
@@ -98,7 +99,7 @@ public class realtion_pxl_mm : MonoBehaviour
         float desviacionTotal =
             Mathf.Sqrt((float) desviacionEstandar / radios.Count);
         Debug.Log("desviación total" + desviacionTotal);
-        Debug.Log (promedio*2);
+        Debug.Log(promedio * 2);
     }
 
     private Mat calibracionCamara(Mat frame)
