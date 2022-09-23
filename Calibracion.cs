@@ -112,14 +112,14 @@ public class Calibracion : MonoBehaviour
         rms = Cv2.CalibrateCamera(objPoints, imgPoints, map1.Size(), camera, distortion, out var rvectors, out var tvectors, CalibrationFlags.UseIntrinsicGuess | CalibrationFlags.FixK5);
         newcam1 = Cv2.GetOptimalNewCameraMatrix(camera, distortion, map1.Size(),1, map1.Size(),out var roi);*/
         //Cv2.InitUndistortRectifyMap(cameraMatrix, distCoeffs, new Mat(), newcam1, Size(700, 680), map1, map2);
-        /*Mat map2 = map1.Clone();
+        Mat map2 = map1.Clone();
         UnityEngine.Debug.Log("Tipo" + map2);
         Cv2.Undistort(map1,map2, cameraMatrix, distCoeffs);
         UnityEngine.Debug.Log("Tipo" + map2);
         Cv2.ImShow("Imagen normal", map1);
         Cv2.ImShow("imagen calibrada", map2);
         //UnityEngine.Debug.Log("Matriz de distorsion" + cameraMatrix.ToString());
-        //UnityEngine.Debug.Log("coeficiente de dst");*/
+        //UnityEngine.Debug.Log("coeficiente de dst");
 
 
     }

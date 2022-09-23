@@ -13,6 +13,8 @@ public class realtion_pxl_mm : MonoBehaviour
     // Start is called before the first frame update
     private List<Double> radios = new List<Double>();
 
+    double desviacionEstandar = 0;
+
     void Start()
     {
         Mat inteto10 = matImageFile("Assets/Caracterizacion_MB/IM1.jpg");
@@ -25,7 +27,7 @@ public class realtion_pxl_mm : MonoBehaviour
     {
     }
 
-    private static Mat matImageFile(string filePath)
+    private Mat matImageFile(string filePath)
     {
         Mat matResult = null;
         if (File.Exists(filePath))
@@ -87,9 +89,42 @@ public class realtion_pxl_mm : MonoBehaviour
                 0.5,
                 255);
             Cv2.ImShow("circulos", burbujas_detetadas);
+
+            // Agregar desviación estandar (cada valor - el promedio)
             radios.Add(circle.Radius);
         }
         double promedio = radios.Average();
-        Debug.Log(promedio*2);
+        foreach (double r in radios)
+        {
+            double desviacion = r - promedio;
+            desviacionEstandar += Math.Pow(desviacion, 2);
+            // Debug.Log("desviación"+ desviacion);
+        }
+        float desviacionTotal =
+            Mathf.Sqrt((float) desviacionEstandar / radios.Count);
+        Debug.Log("desviación total" + desviacionTotal);
+        Debug.Log(promedio * 2);
+    }
+
+    private Mat calibracionCamara(Mat frame)
+    {
+        double[,] cameraMatrix =
+        {
+            { 2.83943297e+03, 0, 1.90306605e+03 },
+            { 0, 2.83339169e+03, 8.95584317e+02 },
+            { 0, 0, 1 }
+        };
+
+        double[] distCoeffs =
+        { -0.01311819, 0.37176549, 0.01207837, 0.00885673, -0.688254 };
+
+        Mat map2 = new Mat();
+        Cv2
+            .Undistort(frame,
+            map2,
+            InputArray.Create(cameraMatrix),
+            InputArray.Create(distCoeffs));
+
+        return map2;
     }
 }
