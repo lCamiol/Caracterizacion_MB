@@ -15,7 +15,7 @@ public class realtion_pxl_mm : MonoBehaviour
 
     void Start()
     {
-        Mat inteto10 = matImageFile("Assets/Caracterizacion_MB/px5.jpg");
+        Mat inteto10 = matImageFile("Assets/Caracterizacion_MB/IM1.jpg");
         Cv2.ImShow("procesada", inteto10);
         Deteccion (inteto10);
     }
@@ -35,24 +35,24 @@ public class realtion_pxl_mm : MonoBehaviour
             var tex = new Texture2D(2, 2);
             tex.LoadImage (fileData); // this will auto-resize the 2,2 texture dimensions.
             matResult = OpenCvSharp.Unity.TextureToMat(tex);
-            Cv2
+          /*  Cv2
                 .Resize(matResult,
                 matResult,
-                new Size((int)(tex.width / 10), (int)(tex.height / 10)));
+                new Size((int)(tex.width / 10), (int)(tex.height / 10)));*/
             Cv2.CvtColor(matResult, matResult, ColorConversionCodes.BGR2GRAY);
-            Cv2.MedianBlur(matResult, matResult, 13);
+            /*Cv2.MedianBlur(matResult, matResult, 13);
             Size ksize1 = new Size(3, 3);
-            Cv2.GaussianBlur(matResult, matResult, ksize1, 180);
+            Cv2.GaussianBlur(matResult, matResult, ksize1, 180);*/
 
             //rellenar agujeros
             Point inicio = new Point(0, 0);
             Cv2.FloodFill(matResult, inicio, 255);
             Mat Kernel =
-                Cv2.GetStructuringElement(MorphShapes.Rect, new Size(8, 8));
-            Mat Kernel2 =
-                Cv2.GetStructuringElement(MorphShapes.Rect, new Size(6, 6));
-            Cv2.Dilate (matResult, matResult, Kernel);
-            Cv2.Erode (matResult, matResult, Kernel2);
+                Cv2.GetStructuringElement(MorphShapes.Rect, new Size(11, 11));
+           /* Mat Kernel2 =
+                Cv2.GetStructuringElement(MorphShapes.Rect, new Size(6, 6));*/
+            Cv2.Dilate(matResult, matResult, Kernel);
+           /* Cv2.Erode(matResult, matResult, Kernel2);*/
             // Cv2.Threshold(matResult, matResult, 70, 255, ThresholdTypes.Binary);
         }
         return matResult;
@@ -64,13 +64,13 @@ public class realtion_pxl_mm : MonoBehaviour
             Cv2
                 .HoughCircles(frame,
                 HoughMethods.Gradient,
-                0.5,
-                15,
+                1,
+                150,
                 12,
                 14,
-                5,
-                15);
-        Mat burbujas_detetadas = new Mat(500, 500, MatType.CV_8UC1, 1);
+                30,
+                60);
+        Mat burbujas_detetadas = new Mat(720, 1280, MatType.CV_8UC1, 1);
         foreach (CircleSegment circle in circles)
         {
             Cv2
@@ -81,7 +81,7 @@ public class realtion_pxl_mm : MonoBehaviour
                 new Scalar(255, 255, 255));
             Cv2
                 .PutText(burbujas_detetadas,
-                (circle.Radius * 10).ToString(),
+                (circle.Radius ).ToString(),
                 new Point((int) circle.Center.X, (int) circle.Center.Y + 30),
                 HersheyFonts.HersheySimplex,
                 0.5,
@@ -90,6 +90,6 @@ public class realtion_pxl_mm : MonoBehaviour
             radios.Add(circle.Radius);
         }
         double promedio = radios.Average();
-        Debug.Log(promedio * 10);
+        Debug.Log(promedio*2);
     }
 }

@@ -171,8 +171,9 @@ public class Lotes : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
+        Cv2.ImShow("Imagen normal", frame);
         frame = calibracionCamara(frame);
-        // Cv2.ImShow("Imagen normal", frame);
+        Cv2.ImShow("Calibracion", frame);
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
@@ -471,13 +472,13 @@ public class Lotes : MonoBehaviour
     private Mat calibracionCamara (Mat frame) {
         double[,] cameraMatrix =
         {
-            { 3062.7055460605, 0, 1786.52621963178 },
-            { 0, 3078.00290144012, 1311.79605688144 },
+            { 2.817437336892799e+03, 0, 1.793057272597920e+03 },
+            { 0, 2.806999996075921e+03, 8.186328235112283e+02 },
             { 0, 0, 1 }
         };
 
         double[] distCoeffs =
-        { 0.0626007343290323, -0.166909764928163, 0, 0, 0 };
+        { 0.096532000225895, -0.857824415968273, 0, 0, 0 };
 
         Mat map2 = new Mat();
         Cv2
