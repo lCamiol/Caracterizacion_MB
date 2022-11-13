@@ -174,17 +174,11 @@ public class Lotes : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
-<<<<<<< HEAD
-        Cv2.ImShow("Imagen normal", frame);
-        frame = calibracionCamara(frame);
-        Cv2.ImShow("Calibracion", frame);
-=======
          Cv2.ImShow("frame orginal" + contador, frame);
         frame = calibracionCamara(frame);
         OpenCvSharp.Rect rectCrop = new OpenCvSharp.Rect(0, 0, 665, 680);
         frame = new Mat(frame, rectCrop);
         // Cv2.ImShow("Imagen calibration", frame);
->>>>>>> 36b7d3d ([Fix] Ajuste)
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
