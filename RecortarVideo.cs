@@ -197,7 +197,7 @@ public class RecortarVideo : MonoBehaviour
 
 
         //Filtro mediana //medfilt2 es propio de matlab
-        Cv2.MedianBlur(frame, frame, 21);
+        Cv2.MedianBlur(frame, frame, 19);
         //Size ksize = new Size(7, 7);
 
         Cv2.Threshold(frame, frame, 120, 255, ThresholdTypes.Binary);
@@ -234,7 +234,7 @@ public class RecortarVideo : MonoBehaviour
     private void DeteccionMB(Mat frame)
     {
         // implementacion Hough circles
-        circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 0.5, 15, 12, 14, 5, 50);
+        circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 1, 30, 12, 14, 5, 50);
         Mat burbujas_detetadas = new Mat(700, 680, MatType.CV_8UC1, 1);
         Mat burubja = new Mat(700, 680, MatType.CV_8UC1, 1);
         // UnityEngine.Debug.LogError(frame.Height);

@@ -42,9 +42,10 @@ public class Lotes : MonoBehaviour
     //medicion Tiempo de ejecucion
     Stopwatch sw_total = new Stopwatch();
     Stopwatch sw_proceso = new Stopwatch();
-    double conversion = 0.6/(600); 
+    double conversion = 0.6 / (272.544);
     double t = 0.00104; //preguntar por wapp
     int numeroBurbuja = 0;
+    int numeroBurbujaIF = 0;
     int contador = 0;
     // Use this for initialization
     void Start()
@@ -95,7 +96,7 @@ public class Lotes : MonoBehaviour
             // extraer textura del video
             Texture mainTexture = videoPlayer.texture;
             //convertir de textura a textua2D
-            
+
             Texture2D texture2D = toTexture2D(mainTexture);
             // convertir la textura a Mat para realizar procesamiento con opencv         
             Mat frame = OpenCvSharp.Unity.TextureToMat(texture2D);
@@ -106,11 +107,11 @@ public class Lotes : MonoBehaviour
             yield return null;
         }
         //UnityEngine.Debug.Log("total frames" + lista_frames.Count);
-        for (int i =210; i < 230; i+=5 )
+        for (int i = 315; i < 345; i += 15)
         {
-                Mat frame = lista_frames[i];
-                //Cv2.ImShow("original" + contador, frame);
-                caracterizacion_MB(frame);
+            Mat frame = lista_frames[i];
+            //Cv2.ImShow("original" + contador, frame);
+            caracterizacion_MB(frame);
         }
         //UnityEngine.Debug.Log("numero" + contador);
         /*sw_total.Stop(); // Detener la medici�n.
@@ -122,20 +123,19 @@ public class Lotes : MonoBehaviour
 
     private void caracterizacion_MB(Mat frame)
     {
-        
-        //Cv2.ImShow("Original " + contador, frame);
+
+        Cv2.ImShow("Original " + contador, frame);
         Mat frameProcesado = procesamiento(frame);
-        // Texture original = OpenCvSharp.Unity.MatToTexture(frame);
-        //     image.texture = original;
-        // //Cv2.ImShow("procesamiento "+ contador, frameProcesado);
+        Texture original = OpenCvSharp.Unity.MatToTexture(frame);
+        image.texture = original;
         MBActual.Clear();
-        //UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
+        ////UnityEngine.Debug.Log("circulos llenos " + MBActual.Count);
         DeteccionMB(frameProcesado);
-        //UnityEngine.Debug.Log("circulos vacios " + MBActual.Count);
+        ////UnityEngine.Debug.Log("circulos vacios " + MBActual.Count);
         circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
-        //MBActual.ForEach(graficar);
+        MBActual.ForEach(graficar);
         categorizacion();
-      
+
         contador += 1;
 
         /*Texture proceso = OpenCvSharp.Unity.MatToTexture(frameProcesado);
@@ -174,90 +174,94 @@ public class Lotes : MonoBehaviour
 
     private Mat procesamiento(Mat frame)
     {
-         Cv2.ImShow("frame orginal" + contador, frame);
         frame = calibracionCamara(frame);
         OpenCvSharp.Rect rectCrop = new OpenCvSharp.Rect(0, 0, 665, 680);
         frame = new Mat(frame, rectCrop);
-        // Cv2.ImShow("Imagen calibration", frame);
         //convertir a escala de grises
         Cv2.CvtColor(frame, frame, ColorConversionCodes.BGR2GRAY);
 
-
         //Cv2.Threshold(frame, frame, 0, 255, ThresholdTypes.Otsu);
-        
+
 
         //Filtro mediana //medfilt2 es propio de matlab
-                Cv2.MedianBlur(frame, frame, 25);
+        Cv2.MedianBlur(frame, frame, 19);
         //Size ksize = new Size(7, 7);
-        
+
+        Cv2.Threshold(frame, frame, 120, 255, ThresholdTypes.Binary);
+
         //Cv2.FastNlMeansDenoising(frame, frame);
 
         //filtro Gause
-        
-                Size ksize1 = new Size(3, 3);
-                Cv2.GaussianBlur(frame, frame, ksize1, 180);
-        //int ddepth = frame.Type().Depth;
-        //Cv2.Laplacian(frame, frame, ddepth, 7, 0.04);
 
-        //rellenar agujeros
-                Point inicio = new Point(0, 0);
-                Cv2.FloodFill(frame, inicio, 255);
+        Size ksize1 = new Size(7, 7);
+        Cv2.GaussianBlur(frame, frame, ksize1, 255);
 
-        //Histograma(frame);
 
-            Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(8 , 8));
-            Mat Kernel2 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(6, 6));
-            Cv2.Dilate(frame, frame, Kernel);  
-            Cv2.Erode(frame, frame, Kernel2);
-            Cv2.Threshold(frame, frame, 110, 255, ThresholdTypes.Binary);
-        
-        //filtro de canny
-            Cv2.Canny(frame, frame, 0, 255, 5, true);
+        //////int ddepth = frame.Type().Depth;
+        //////Cv2.Laplacian(frame, frame, ddepth, 7, 0.04);
 
-        Cv2.ImShow("frame procesado " + contador, frame);
+        ////rellenar agujeros
+        //Point inicio = new Point(0, 0);
+        //Cv2.FloodFill(frame, inicio, 255);
+
+        //////Histograma(frame);
+
+        //Mat Kernel1 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(5, 5));
+        //Mat Kernel2 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(6, 6));
+        //Cv2.Dilate(frame, frame, Kernel1);
+        //Cv2.Erode(frame, frame, Kernel2);
+        //Cv2.Threshold(frame, frame, 120, 255, ThresholdTypes.Binary);
+
+
+        ////filtro de canny
+        //Cv2.Canny(frame, frame, 0, 255, 5, true);
         return frame;
     }
 
     private void DeteccionMB(Mat frame)
     {
         // implementacion Hough circles
-        // circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 0.5, 5, 12, 14, 5, 30);
-        circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 0.5, 5, 12, 14);
+        circles = Cv2.HoughCircles(frame, HoughMethods.Gradient, 1, 30, 12, 14, 5, 50);
         Mat burbujas_detetadas = new Mat(700, 680, MatType.CV_8UC1, 1);
         Mat burubja = new Mat(700, 680, MatType.CV_8UC1, 1);
-        // UnityEngine.Debug.LogError(frame.Height);
+
+        //UnityEngine.Debug.LogError(frame);
         // recorrer cada circulo encontrado
         foreach (CircleSegment circle in circles)
         {
-            // UnityEngine.Debug.LogError("cordenadas "+ (int)circle.Center.X+ " " +(int)circle.Center.Y);
+            //UnityEngine.Debug.LogError("cordenadas "+ (int)circle.Center.X+ " " +(int)circle.Center.Y);
             // validar si la burbuja llega desde abajo
-            if ((int)circle.Center.Y >= 660)
+            if ((int)circle.Center.Y >= 670)
             {
+                numeroBurbujaIF = numeroBurbujaIF + 1;
+                UnityEngine.Debug.LogError(numeroBurbujaIF);
                 // crear arrelo con cordenadas de la burbuja
                 int[] coordenadasDentro = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
                 Cv2.Circle(burbujas_detetadas, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
                 // mostrar grafico de circulos
-                // Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
+                Cv2.ImShow("circulos detectados en if " + contador, burbujas_detetadas);
                 // agregar a la lista de burbuja anterior para validar que lleguen desde abajo
                 MBAnterior.Add(coordenadasDentro);
+
             }
-            
+
             //Cv2.Circle(burubja, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
-            // Cv2.ImShow("circulos detectados " + contador, burubja);
+            ////UnityEngine.Debug.LogError("cordenadas " + (int)circle.Center.X + " " + (int)circle.Center.Y + " " + (int)circle.Radius) ;
+            //Cv2.ImShow("circulos detectados " + contador, burubja);
             // crear arrelo con cordenadas de la burbuja
             int[] coordenadas = { (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius };
             // agregar a lista actual para validar el dezplazamiento por frame
             MBActual.Add(coordenadas);
             //Cv2.Circle(circulos, (int)circle.Center.X, (int)circle.Center.Y, (int)circle.Radius, new Scalar(255, 255, 255));
         }
-        
+
 
     }
 
     private void categorizacion()
     {
         //MBOrdenar.Clear(); 
-        // UnityEngine.Debug.Log("Cantidad Actual " + MBActual.Count + " Anterior " + MBAnterior.Count);
+        //UnityEngine.Debug.Log("Cantidad Actual " + MBActual.Count + " Anterior " + MBAnterior.Count);
         // verificar que las MB anterior y actual se hayan registrado
         if (MBActual.Count > 0 && MBAnterior.Count > 0)
         {
@@ -266,18 +270,23 @@ public class Lotes : MonoBehaviour
             circulos = new Mat(700, 680, MatType.CV_8UC1, 1);// Mat auxiliar utilizado para graficar
             numeroBurbuja = 0;
             MBOrdenar.ForEach(graficar);// se recore Mb actual y por cada elemento se aplica la funcion grafica
-           // UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
+                                        // UnityEngine.Debug.Log("Cantidad  Ordenada" + MBOrdenar.Count );
             MBAnterior = new List<int[]>(MBOrdenar); // se colana la informacion de MBOrdenar a Mb anteriorS
             velocidad(MBOrdenar);// limpiar Mb actual para las burbujas del nuevo frame
             if (velocidadPromedioLote.Count > 0)
             {
                 double velocidadLotes = velocidadPromedioLote.Average();
                 double diametroLotes = diametroPromedioLote.Average();
-                MBDatos.text= "" + velocidadPromedioLote.Count() + "";
+                MBDatos.text = "" + numeroBurbujaIF + "";
                 VelocidadDatos.text = "" + Math.Round(velocidadLotes, 2) + " mm/seg";
-                DiametroDatos.text = "" + Math.Round(diametroLotes, 2)  + " μm";
-                // UnityEngine.Debug.LogError("velocidad lotes" + velocidadLotes);
-                // UnityEngine.Debug.LogError("diametro lotes" + diametroLotes);
+                DiametroDatos.text = "" + Math.Round(diametroLotes, 2) + " μm";
+                List<Double> copia_velocidad = new List<Double>(velocidadPromedioLote);
+                List<Double> copia_Diametro = new List<Double>(diametroPromedioLote);
+                copia_velocidad.Sort();
+                Double minVel = copia_velocidad[0];
+                Double maxVel = copia_velocidad[copia_velocidad.Count() - 1];
+                UnityEngine.Debug.LogError("min velocidad " + minVel);
+                UnityEngine.Debug.LogError("max velocidad" + minVel);
             }
             //sw_proceso.Stop(); // Detener la medici�n.
             //tiempo_proceso.text = "Proceso " + sw_proceso.Elapsed.ToString("ss\\.fff") + " seg"; // Mostrar el tiempo total transcurriodo con un formato ss.000
@@ -310,13 +319,13 @@ public class Lotes : MonoBehaviour
 
     private void graficar(int[] burbuja_Actual)
     {
-    //UnityEngine.Debug.Log("coor�"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
-    // funcion utilizada para grafifcar cirulos, Mat para dibujar, coordenada x, cordenada y, radio, escala
+        //UnityEngine.Debug.Log("coor�"+ (int)burbuja_Actual[0] + " "  +(int)burbuja_Actual[1]+ " " +(int)burbuja_Actual[2]);
+        // funcion utilizada para grafifcar cirulos, Mat para dibujar, coordenada x, cordenada y, radio, escala
         Cv2.Circle(circulos, (int)burbuja_Actual[0], (int)burbuja_Actual[1], (int)burbuja_Actual[2], new Scalar(255, 255, 255));
         numeroBurbuja = numeroBurbuja + 1;
-        Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
+        Cv2.PutText(circulos, (burbuja_Actual[2] * 2).ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
         // mostrar grafico de circulos
-        //Cv2.ImShow("circulos " + contador, circulos);
+        Cv2.ImShow("circulos " + contador, circulos);
         // convertir el Mat circulos a textura
         Texture proceso = OpenCvSharp.Unity.MatToTexture(circulos);
         // subir textura en unity
@@ -377,7 +386,7 @@ public class Lotes : MonoBehaviour
     {
         List<Double> velocidadPromedio = new List<Double>();
         List<Double> diamtreoPromedio = new List<Double>();
-    
+
         double velocidadProm = 0;
         double diametroProm = 0;
         int posicion = 0; //recorrer de forma parelela los dos arreglos
@@ -398,10 +407,10 @@ public class Lotes : MonoBehaviour
             // implementar formula de distancia euclidiana
             float calculo_distancia = Mathf.Sqrt((dX ^ 2) + (dY ^ 2));
             // Calculo de la velocidad
+            //UnityEngine.Debug.Log("velocidad " + contador +" " + calculo_distancia);
             double Velocidad = (conversion * calculo_distancia) / t;
-            //  UnityEngine.Debug.Log("velocidad " + contador +" " + Velocidad);
             velocidadPromedio.Add(Velocidad);
-            diamtreoPromedio.Add(coordenadas_burbuja_anterior[2]*2*conversion*1000);
+            diamtreoPromedio.Add(coordenadas_burbuja_anterior[2] * 2 * conversion * 1000);
 
             // Aumentar la posicion
             posicion = +1;
@@ -410,12 +419,13 @@ public class Lotes : MonoBehaviour
             //UnityEngine.Debug.Log("velocidad Promedio" + velocidadProm);
             //UnityEngine.Debug.Log("Tama�o Promedio" + diametroProm);
         }
-        if(diamtreoPromedio.Count > 0)
+        if (diamtreoPromedio.Count > 0)
         {
             diametroProm = diamtreoPromedio.Average();
+            UnityEngine.Debug.Log("Tama�o " + posicion + " " + diametroProm);
             diametroPromedioLote.Add(diametroProm);
-            Cv2.PutText(diametro, "*", new Point(contador *10 , diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
-            Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
+            Cv2.PutText(diametro, "*", new Point(contador * 10, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador * 10, diametro.Height - diametroProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             // Cv2.ImShow("diametros ", diametro);
             Texture histoDiametro = OpenCvSharp.Unity.MatToTexture(diametro);
@@ -425,14 +435,14 @@ public class Lotes : MonoBehaviour
         {
             velocidadProm = velocidadPromedio.Average();
             velocidadPromedioLote.Add(velocidadProm);
-            Cv2.PutText(velocidadGrafico, "-", new Point(contador *10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
+            Cv2.PutText(velocidadGrafico, "-", new Point(contador * 10, velocidadGrafico.Height - Math.Round(velocidadProm, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
             Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(contador * 10, diametro.Height - velocidadProm - 10), HersheyFonts.HersheySimplex, 0.2, 173);
 
             //Cv2.ImShow("velocidad", velocidadGrafico);
             Texture histoVelocidad = OpenCvSharp.Unity.MatToTexture(velocidadGrafico);
             imageVelocidad.texture = histoVelocidad;
         }
-             
+
 
     }
 
@@ -456,7 +466,7 @@ public class Lotes : MonoBehaviour
         GamObjHistograma.SetActive(false);
     }
 
-    
+
     public void mosHistograma()
     {
 
@@ -468,16 +478,17 @@ public class Lotes : MonoBehaviour
     }
 
     public void mosAcercaDe()
-        {
+    {
 
-            Proces.SetActive(false);
-            Menu.SetActive(false);
-            GamObjHistograma.SetActive(false);
-            AcercaDe.SetActive(true);
-            Application.runInBackground = true;
-        }
-        
-    private Mat calibracionCamara (Mat frame) {
+        Proces.SetActive(false);
+        Menu.SetActive(false);
+        GamObjHistograma.SetActive(false);
+        AcercaDe.SetActive(true);
+        Application.runInBackground = true;
+    }
+
+    private Mat calibracionCamara(Mat frame)
+    {
         double[,] cameraMatrix =
         {
             {2.83943297e+03, 0, 1.90306605e+03 },
