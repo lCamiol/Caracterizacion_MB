@@ -11,11 +11,11 @@ using System;
 public class RecortarVideo : MonoBehaviour
 {
     //Raw Image to Show Video Images [Assign from the Editor]
-    public RawImage image;
+    [SerializeField] private RawImage image = null;
     public RawImage imageDiametro;
     public RawImage imageVelocidad;
     //Video To Play [Assign from the Editor]
-    public VideoClip videoToPlay;
+    // public VideoClip videoToPlay;
     //Texto para mostrar tiempo 
     public Text status;
     public Text MBDatos;
@@ -54,6 +54,7 @@ public class RecortarVideo : MonoBehaviour
     int numeroBurbujaIF = 0;
     int posiconHisto = 0;
     int contador = 0;
+    String path = "Assets/Caracterizacion_MB/34psi9-11/34psi_6.mp4";
     // Use this for initialization
     void Start()
     {
@@ -67,7 +68,8 @@ public class RecortarVideo : MonoBehaviour
     }
 
     IEnumerator playVideo()
-    {
+    {   
+    
         //Add VideoPlayer to the GameObject
         videoPlayer = gameObject.AddComponent<VideoPlayer>();
 
@@ -75,23 +77,24 @@ public class RecortarVideo : MonoBehaviour
         videoPlayer.playOnAwake = false;
 
         //We want to play from video clip not from url
-        videoPlayer.source = VideoSource.VideoClip;
+        videoPlayer.source = VideoSource.Url;
+        videoPlayer.url = path;
 
         //Set video To Play then prepare Audio to prevent Buffering
-        videoPlayer.clip = videoToPlay;
+        // videoPlayer.clip = videoToPlay;
         videoPlayer.Prepare();
 
         //Wait until video is prepared
         while (!videoPlayer.isPrepared)
         {
-            UnityEngine.Debug.Log("Preparing Video");
+            //UnityEngine.Debug.Log("Preparing Video");
             status.text = "Preparing Video";
             yield return null;
         }
-        UnityEngine.Debug.Log("Done Preparing Video");
+        //UnityEngine.Debug.Log("Done Preparing Video");
         status.text = "Done Preparing Video";
 
-        //image.texture = videoPlayer.texture;
+        image.texture = videoPlayer.texture;
 
         //Play Video
         videoPlayer.Play();
@@ -538,6 +541,11 @@ public class RecortarVideo : MonoBehaviour
             InputArray.Create(distCoeffs));
 
         return map2;
+    }
+
+    public void obtenerVideo () {
+            NativeGallery.GetVideoFromGallery( ( rutaCel ) =>
+                { path = rutaCel;});
     }
 
 }
