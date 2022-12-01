@@ -39,6 +39,7 @@ public class RecortarVideo : MonoBehaviour
     private List<Double> velocidadPromedioLote = new List<Double>();
     private List<Double> diametroPromedioLote = new List<Double>();
     private CircleSegment[] circles;
+    public Mat trayectoria = new Mat(670, 700, MatType.CV_8UC1, 1);
     List<Mat> lista_frames = new List<Mat>();
     [SerializeField] private GameObject Proces = null;
     [SerializeField] private GameObject Menu = null;
@@ -342,6 +343,8 @@ public class RecortarVideo : MonoBehaviour
         Cv2.Circle(circulos, (int)burbuja_Actual[0], (int)burbuja_Actual[1], (int)burbuja_Actual[2], new Scalar(255, 255, 255));
         numeroBurbuja = numeroBurbuja + 1;
         Cv2.PutText(circulos, numeroBurbuja.ToString(), new Point(burbuja_Actual[0], burbuja_Actual[1]), HersheyFonts.HersheySimplex, 1, 255);
+        Cv2.PutText(trayectoria, "'", new Point((burbuja_Actual[0]), (burbuja_Actual[1])), HersheyFonts.HersheySimplex, 0.8, 255);
+        Cv2.ImShow("trayectoria ", trayectoria);
         // mostrar grafico de circulos
         //Cv2.ImShow("circulos " + contador, circulos);
         // convertir el Mat circulos a textura
