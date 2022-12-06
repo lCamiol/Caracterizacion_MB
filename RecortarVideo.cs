@@ -28,8 +28,8 @@ public class RecortarVideo : MonoBehaviour
     public Text MBDatosVel;
     public Button btnHistograma;
     public Mat circulos = new Mat(700, 680, MatType.CV_8UC1, 1);
-    public Mat diametro = new Mat(250, 1000, MatType.CV_8UC1, 1);
-    public Mat velocidadGrafico = new Mat(170, 730, MatType.CV_8UC1, 1);
+    public Mat diametro = new Mat(250, 1200, MatType.CV_8UC1, 1);
+    public Mat velocidadGrafico = new Mat(185, 1200, MatType.CV_8UC1, 1);
     //Video a reproducir
     private VideoPlayer videoPlayer;
     private VideoSource videoSource;
@@ -447,9 +447,9 @@ public class RecortarVideo : MonoBehaviour
             diametroProm = diamtreoPromedio.Average();
             diametroPromedioLote.Add(diametroProm);
             Cv2.PutText(diametro, "o", new Point(contador * 12, diametro.Height - Math.Round(diametroProm, 2)), HersheyFonts.HersheySimplex, 1, 255);
-            // Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador  * 12, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.5, 173);
+            //Cv2.PutText(diametro, Math.Round(diametroProm, 2).ToString(), new Point(contador  * 12, diametro.Height- diametroProm - 10), HersheyFonts.HersheySimplex, 0.5, 173);
 
-            // Cv2.ImShow("diametros ", diametro);
+            Cv2.ImShow("diametros ", diametro);
             Texture histoDiametro = OpenCvSharp.Unity.MatToTexture(diametro);
             imageDiametro.texture = histoDiametro;
         }
@@ -457,10 +457,10 @@ public class RecortarVideo : MonoBehaviour
         {
             velocidadProm = velocidadPromedio.Average();
             velocidadPromedioLote.Add(velocidadProm);
-            Cv2.PutText(velocidadGrafico, "->", new Point(posiconHisto * 12, velocidadGrafico.Height - Math.Round(velocidadProm*8, 2)), HersheyFonts.HersheySimplex, 0.5, 255);
-            // Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(posiconHisto * 12, velocidadGrafico.Height - Math.Round(velocidadProm * 10, 2) - 10), HersheyFonts.HersheySimplex, 0.2, 255);
+            Cv2.PutText(velocidadGrafico, "->", new Point(posiconHisto * 12, velocidadGrafico.Height - Math.Round(velocidadProm*8, 2)), HersheyFonts.HersheySimplex, 0.5, 250);
+           // Cv2.PutText(velocidadGrafico, Math.Round(velocidadProm, 2).ToString(), new Point(posiconHisto * 12, velocidadGrafico.Height - Math.Round(velocidadProm * 10, 2) - 10), HersheyFonts.HersheySimplex, 0.2, 255);
 
-            //Cv2.ImShow("velocidad", velocidadGrafico);
+            Cv2.ImShow("velocidad", velocidadGrafico);
             Texture histoVelocidad = OpenCvSharp.Unity.MatToTexture(velocidadGrafico);
             imageVelocidad.texture = histoVelocidad;
         }
